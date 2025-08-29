@@ -6,6 +6,17 @@
     min-height: 100svh; 
 }
 
+#interactiveImageContainer{
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 999;
+  pointer-events: none;
+}
+
+#interactiveImageContainer img{
+  pointer-events: auto;
+}
 
 html, body{
     margin: 0;

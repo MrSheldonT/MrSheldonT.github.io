@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="icon" href="./assets/images/icons/favicon.ico" type="image/png">
-    <title>
-        Slash
-    </title>
-    <link rel="stylesheet" href="./assets/css/styles.css">
+    <title> Slash </title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="description" content="Writeups de máquinas en echoCTF">
+    <link rel="icon" href="./assets/images/icons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
 
-<body id="principal">    
+<body id="principal">
+        
     <div id="dock">
-        <button class="program_icon" popovertarget="about_me-popover">
+        <button class="program_icon" popovertarget="about_me-popover" >
             <img src="./assets/images/icons/about_me.png" alt="about me">
         </button>
 
@@ -27,11 +27,11 @@
 
 
     <!-- Aquí es sobre mí -->
-    <iframe class="program_window" src="./about_me.html" popover id="about_me-popover"></iframe>
+    <iframe class="program_window" src="./about_me.html" popover id="about_me-popover" title="Sobre mí" loading="lazy"></iframe>
     <!-- Aquí es el writeup -->
-    <iframe class="program_window"  src="./docs/writeup_netchores.html" popover id="writeups-popover-netchores"></iframe>
+    <iframe class="program_window"  src="./docs/writeup_netchores.html" popover id="writeups-popover-netchores" title="writeup Netchores" loading="lazy"></iframe>
     <!-- Aquí es el writeup -->
-    <iframe class="program_window"  src="./docs/writeup_flatliner.html" popover id="writeups-popover-flatliner" ></iframe>
+    <iframe class="program_window"  src="./docs/writeup_flatliner.html" popover id="writeups-popover-flatliner" title="Writeup Flatliner" loading="lazy" ></iframe>
 
 
     <!-- Aquí es la vaca -->

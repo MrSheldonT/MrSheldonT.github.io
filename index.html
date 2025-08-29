@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" href="./assets/images/icons/favicon.ico" type="image/png">
+    <title>
+        Slash
+    </title>
+    <link rel="stylesheet" href="./assets/css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+
+<body id="principal">    
+    <div id="dock">
+        <button class="program_icon" popovertarget="about_me-popover">
+            <img src="./assets/images/icons/about_me.png" alt="about me">
+        </button>
+
+        <button class="program_icon" popovertarget="writeups-popover-netchores">
+            <img src="./assets/images/icons/netchores.png" alt="netchores">
+        </button>
+
+        <button class="program_icon" popovertarget="writeups-popover-flatliner">
+            <img src="./assets/images/icons/flatliner.png" alt="flatliner">
+        </button>
+    </div>
+
+
+    <!-- Aquí es sobre mí -->
+    <iframe class="program_window" src="./about_me.html" popover id="about_me-popover"></iframe>
+    <!-- Aquí es el writeup -->
+    <iframe class="program_window"  src="./docs/writeup_netchores.html" popover id="writeups-popover-netchores"></iframe>
+    <!-- Aquí es el writeup -->
+    <iframe class="program_window"  src="./docs/writeup_flatliner.html" popover id="writeups-popover-flatliner" ></iframe>
+
+
+    <!-- Aquí es la vaca -->
+    <pre id="cowsay" role="img" aria-label="ASCII COW">
+         ______________
+        &lt; hello friend &gt;
+         --------------
+                \   ^__^
+                 \  (oo)\_______
+                    (__)\       )\/\
+                        ||----w |
+                        ||     ||
+    </pre>
+
+
+    <!-- Aquí va el ticker -->
+    <div id="ticker">
+        <p id="ticker-text">Holaaaaaaaa</p>
+    </div>
+    
+    <div id="interactiveImageContainer"></div>
+    <script src="./src/functions.js"></script>
+    <script>
+        init()
+    </script>
+</body>
+</html>

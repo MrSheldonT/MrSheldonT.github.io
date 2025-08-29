@@ -1,0 +1,100 @@
+#principal{
+    background-image: url("../images/wallpaper_windows_xp.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 100svh; 
+}
+
+
+html, body{
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.img_practicas {
+    max-width: 80%;
+    max-height: 80%;
+    height: auto;
+    width: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.program_icon {
+    height: 60px;
+    width: 60px;
+    display: flex; 
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    margin-bottom: 10px;
+}
+
+.program_icon img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.program_icon:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #3c69ff8f;
+    transition: opacity 0.3s;
+}
+
+.program_window {
+    width: 65vw;
+    height: 70vh;
+    background-color: #ece9d8;
+    border: 4px solid #0256ea;
+    border-top: 15px solid #3c69ff;
+    border-radius: 4px;
+    padding: 20px;
+    
+}
+
+#cowsay{
+        color: rgb(255, 255, 255);
+        position: fixed;
+        bottom: 8%;
+        right: 5%;  
+        font-weight: bold;   
+}
+
+#ticker {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 5%;
+    background: #111;
+    color: rgb(255, 255, 255);
+    font-family: 'JetBrainsMono', monospace;
+    font-size: 14px;
+
+    display: flex;
+    align-items: center;     
+
+}
+
+#ticker p {
+    display: inline-block; /* <- */    
+    align-items: center; /* <- */
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: ticker 5s linear infinite;
+}
+
+@keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
